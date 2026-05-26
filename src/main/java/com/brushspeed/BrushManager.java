@@ -19,7 +19,7 @@ public class BrushManager {
 
     private final BrushSpeedPlugin plugin;
 
-    // Player UUID -> manually set speed (null = use default/permission tier)
+    // Player UUID -> manually set speed (op-only via command)
     private final Map<UUID, Double> playerSpeeds = new HashMap<>();
 
     // Player UUID -> (block location key -> stroke count)
@@ -29,29 +29,10 @@ public class BrushManager {
         this.plugin = plugin;
     }
 
-    /**
-     * Returns the effective speed for a player, checking (in order):
-     * 1. Manually set speed via command
-     * 2. Permission-based speed tier (highest tier wins)
-     * 3. Config default-speed
-     */
     public double getEffectiveSpeed(Player player) {
         if (playerSpeeds.containsKey(player.getUniqueId())) {
             return playerSpeeds.get(player.getUniqueId());
         }
-
-        var permSpeeds = plugin.getConfig().getConfigurationSection("permission-speeds");
-        if (permSpeeds != null) {
-            double best = -1;
-            for (String tier : permSpeeds.getKeys(false)) {
-                if (player.hasPermission("brushspeed.speed." + tier)) {
-                    double spd = permSpeeds.getDouble(tier);
-                    if (spd > best) best = spd;
-                }
-            }
-            if (best > 0) return best;
-        }
-
         return plugin.getConfig().getDouble("default-speed", 1.0);
     }
 

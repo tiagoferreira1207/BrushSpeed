@@ -1,13 +1,12 @@
 # BrushSpeed
 
-A Paper Minecraft plugin that lets you control how fast players brush suspicious sand and gravel blocks.
+A Paper Minecraft plugin that lets OPs control how fast players brush suspicious sand and gravel blocks.
 
 ## Features
 
 - Set brush speed per player — from 0.1x (very slow) up to 10x (instant)
-- Permission-based speed tiers (VIP, Elite, etc.) configurable in `config.yml`
 - Action bar progress indicator while brushing
-- Admin command to set speed for other players
+- OPs can set speed for any player
 - All messages customizable in `config.yml`
 
 ## Requirements
@@ -24,27 +23,26 @@ A Paper Minecraft plugin that lets you control how fast players brush suspicious
 
 ## Commands
 
-| Command | Description | Permission |
+| Command | Description | Who can use |
 |---|---|---|
-| `/brushspeed` | Show your current brush speed | `brushspeed.use` |
-| `/brushspeed set <speed>` | Set your own brush speed (0.1–10.0) | `brushspeed.set` |
-| `/brushspeed set <speed> <player>` | Set another player's brush speed | `brushspeed.set.others` |
-| `/brushspeed reset` | Reset your speed to default | `brushspeed.use` |
-| `/brushspeed reload` | Reload the config | `brushspeed.reload` |
+| `/brushspeed` | Show your current brush speed | OP only |
+| `/brushspeed set <speed>` | Set your own brush speed (0.1–10.0) | OP only |
+| `/brushspeed set <speed> <player>` | Set another player's brush speed | OP only |
+| `/brushspeed reset` | Reset your speed to default | OP only |
+| `/brushspeed reload` | Reload the config | OP only |
 
 Alias: `/bs`, `/bspeed`
 
 ## Permissions
 
-| Permission | Default | Description |
-|---|---|---|
-| `brushspeed.use` | everyone | View own speed and reset |
-| `brushspeed.set` | op | Set own speed |
-| `brushspeed.set.others` | op | Set other players' speed |
-| `brushspeed.reload` | op | Reload config |
-| `brushspeed.speed.vip` | false | Gives VIP speed tier from config |
-| `brushspeed.speed.elite` | false | Gives Elite speed tier from config |
-| `brushspeed.speed.slow` | false | Gives slow speed tier from config |
+All permissions default to **OP only**. Non-OP players cannot use any command.
+
+| Permission | Description |
+|---|---|
+| `brushspeed.use` | View own brush speed |
+| `brushspeed.set` | Set own brush speed |
+| `brushspeed.set.others` | Set another player's brush speed |
+| `brushspeed.reload` | Reload the config |
 
 ## Configuration
 
@@ -57,12 +55,6 @@ max-speed: 10.0
 
 # Vanilla takes 10 strokes to excavate a block
 base-strokes: 10
-
-# Grant these speeds via brushspeed.speed.<tier> permission
-permission-speeds:
-  vip: 2.0
-  elite: 5.0
-  slow: 0.5
 
 show-progress-bar: true
 ```

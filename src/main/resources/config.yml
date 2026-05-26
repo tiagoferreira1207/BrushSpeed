@@ -17,15 +17,6 @@ max-speed: 10.0
 # Changing this affects ALL speeds proportionally
 base-strokes: 10
 
-# Permission-based speed tiers
-# Players with brushspeed.speed.<tier> get the speed listed here
-# If a player has multiple tiers, the highest speed wins
-# Manually set speeds (/brushspeed set) always override these
-permission-speeds:
-  vip: 2.0
-  elite: 5.0
-  slow: 0.5
-
 # Whether to show an action bar progress indicator while brushing
 show-progress-bar: true
 
