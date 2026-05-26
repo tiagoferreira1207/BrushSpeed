@@ -22,6 +22,8 @@ show-progress-bar: true
 
 # Messages — supports & color codes
 messages:
+  speed-set-all: "&6[BrushSpeed] &aThe brush speed has been changed to &f{speed}x &afor everyone!"
+  speed-reset-all: "&6[BrushSpeed] &aThe brush speed has been reset to default &f({speed}x) &afor everyone!"
   speed-set: "&aBrush speed set to &f{speed}x&a."
   speed-get: "&6Current brush speed: &f{speed}x"
   speed-reset: "&aBrush speed reset to default &f({speed}x)&a."

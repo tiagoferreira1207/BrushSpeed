@@ -9,7 +9,7 @@ website: https://github.com/tiagoferreira/BrushSpeed
 commands:
   brushspeed:
     description: Manage brush speed settings
-    usage: /brushspeed [set <speed> [player]|reset|reload]
+    usage: /brushspeed [set <speed> [player]|setall <speed>|reset|resetall|reload]
     aliases: [bs, bspeed]
     permission: brushspeed.use
 
@@ -22,6 +22,9 @@ permissions:
     default: op
   brushspeed.set.others:
     description: Allows setting other players' brush speed
+    default: op
+  brushspeed.setall:
+    description: Allows setting brush speed for all players at once
     default: op
   brushspeed.reload:
     description: Allows reloading the plugin config

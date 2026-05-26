@@ -19,8 +19,11 @@ public class BrushManager {
 
     private final BrushSpeedPlugin plugin;
 
-    // Player UUID -> manually set speed (op-only via command)
+    // Player UUID -> individually set speed (overrides global)
     private final Map<UUID, Double> playerSpeeds = new HashMap<>();
+
+    // Global speed applied to every player (null = not set)
+    private Double globalSpeed = null;
 
     // Player UUID -> (block location key -> stroke count)
     private final Map<UUID, Map<String, Integer>> brushSessions = new HashMap<>();
@@ -29,9 +32,13 @@ public class BrushManager {
         this.plugin = plugin;
     }
 
+    // Priority: per-player speed → global speed → config default
     public double getEffectiveSpeed(Player player) {
         if (playerSpeeds.containsKey(player.getUniqueId())) {
             return playerSpeeds.get(player.getUniqueId());
+        }
+        if (globalSpeed != null) {
+            return globalSpeed;
         }
         return plugin.getConfig().getDouble("default-speed", 1.0);
     }
@@ -42,6 +49,21 @@ public class BrushManager {
 
     public void resetSpeed(Player player) {
         playerSpeeds.remove(player.getUniqueId());
+    }
+
+    public void setGlobalSpeed(double speed) {
+        this.globalSpeed = speed;
+        // Clear per-player overrides so everyone uses the new global speed
+        playerSpeeds.clear();
+    }
+
+    public void resetGlobalSpeed() {
+        this.globalSpeed = null;
+        playerSpeeds.clear();
+    }
+
+    public Double getGlobalSpeed() {
+        return globalSpeed;
     }
 
     /**

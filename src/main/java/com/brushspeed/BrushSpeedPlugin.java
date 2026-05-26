@@ -52,10 +52,12 @@ public class BrushSpeedPlugin extends JavaPlugin implements CommandExecutor, Tab
 
         return switch (args[0].toLowerCase()) {
             case "set" -> handleSet(sender, args);
+            case "setall" -> handleSetAll(sender, args);
             case "reset" -> handleReset(sender);
+            case "resetall" -> handleResetAll(sender);
             case "reload" -> handleReload(sender);
             default -> {
-                sender.sendMessage(legacyColor("&6Usage: /brushspeed [set <speed> [player] | reset | reload]"));
+                sender.sendMessage(legacyColor("&6Usage: /brushspeed [set <speed> [player] | setall <speed> | reset | resetall | reload]"));
                 yield true;
             }
         };
@@ -118,6 +120,58 @@ public class BrushSpeedPlugin extends JavaPlugin implements CommandExecutor, Tab
         return true;
     }
 
+    private boolean handleSetAll(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("brushspeed.setall")) {
+            sender.sendMessage(legacyColor(getMessage("no-permission")));
+            return true;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(legacyColor("&cUsage: /brushspeed setall <speed>"));
+            return true;
+        }
+
+        double min = getConfig().getDouble("min-speed", 0.1);
+        double max = getConfig().getDouble("max-speed", 10.0);
+
+        try {
+            double speed = Double.parseDouble(args[1]);
+            if (speed < min || speed > max) {
+                sender.sendMessage(legacyColor(getMessage("invalid-speed")
+                        .replace("{min}", formatSpeed(min))
+                        .replace("{max}", formatSpeed(max))));
+                return true;
+            }
+            brushManager.setGlobalSpeed(speed);
+            String speedStr = formatSpeed(speed);
+            // Broadcast to all online players
+            Component broadcast = legacyColor(getMessage("speed-set-all").replace("{speed}", speedStr));
+            getServer().getOnlinePlayers().forEach(p -> p.sendMessage(broadcast));
+            if (!(sender instanceof Player)) {
+                sender.sendMessage(legacyColor("&aGlobal brush speed set to &f" + speedStr + "x&a."));
+            }
+        } catch (NumberFormatException e) {
+            sender.sendMessage(legacyColor(getMessage("invalid-speed")
+                    .replace("{min}", formatSpeed(min))
+                    .replace("{max}", formatSpeed(max))));
+        }
+        return true;
+    }
+
+    private boolean handleResetAll(CommandSender sender) {
+        if (!sender.hasPermission("brushspeed.setall")) {
+            sender.sendMessage(legacyColor(getMessage("no-permission")));
+            return true;
+        }
+        brushManager.resetGlobalSpeed();
+        double def = getConfig().getDouble("default-speed", 1.0);
+        Component broadcast = legacyColor(getMessage("speed-reset-all").replace("{speed}", formatSpeed(def)));
+        getServer().getOnlinePlayers().forEach(p -> p.sendMessage(broadcast));
+        if (!(sender instanceof Player)) {
+            sender.sendMessage(legacyColor("&aGlobal brush speed reset to default (&f" + formatSpeed(def) + "x&a)."));
+        }
+        return true;
+    }
+
     private boolean handleReset(CommandSender sender) {
         if (!(sender instanceof Player player)) {
             sender.sendMessage("Only players can reset their speed.");
@@ -143,9 +197,9 @@ public class BrushSpeedPlugin extends JavaPlugin implements CommandExecutor, Tab
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("set", "reset", "reload");
+            return Arrays.asList("set", "setall", "reset", "resetall", "reload");
         }
-        if (args.length == 2 && args[0].equalsIgnoreCase("set")) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setall"))) {
             return Arrays.asList("0.5", "1.0", "2.0", "5.0", "10.0");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("set")) {

@@ -4,9 +4,10 @@ A Paper Minecraft plugin that lets OPs control how fast players brush suspicious
 
 ## Features
 
-- Set brush speed per player — from 0.1x (very slow) up to 10x (instant)
+- Set brush speed for **all players at once** with a single command
+- Set brush speed per player individually
+- Speed range: 0.1x (very slow) up to 10x (instant)
 - Action bar progress indicator while brushing
-- OPs can set speed for any player
 - All messages customizable in `config.yml`
 
 ## Requirements
@@ -26,22 +27,35 @@ A Paper Minecraft plugin that lets OPs control how fast players brush suspicious
 | Command | Description | Who can use |
 |---|---|---|
 | `/brushspeed` | Show your current brush speed | OP only |
+| `/brushspeed setall <speed>` | Set brush speed for **all players** at once | OP only |
+| `/brushspeed resetall` | Reset everyone back to default speed | OP only |
 | `/brushspeed set <speed>` | Set your own brush speed (0.1–10.0) | OP only |
-| `/brushspeed set <speed> <player>` | Set another player's brush speed | OP only |
-| `/brushspeed reset` | Reset your speed to default | OP only |
+| `/brushspeed set <speed> <player>` | Set a specific player's brush speed | OP only |
+| `/brushspeed reset` | Reset your own speed to default | OP only |
 | `/brushspeed reload` | Reload the config | OP only |
 
 Alias: `/bs`, `/bspeed`
 
+## Speed priority
+
+When a player brushes, the speed is resolved in this order:
+
+1. **Individual speed** — set via `/brushspeed set <speed> <player>`
+2. **Global speed** — set via `/brushspeed setall <speed>`
+3. **Config default** — `default-speed` in `config.yml`
+
+> Using `/brushspeed setall` clears all individual overrides so everyone gets the same speed.
+
 ## Permissions
 
-All permissions default to **OP only**. Non-OP players cannot use any command.
+All permissions default to **OP only**.
 
 | Permission | Description |
 |---|---|
 | `brushspeed.use` | View own brush speed |
 | `brushspeed.set` | Set own brush speed |
 | `brushspeed.set.others` | Set another player's brush speed |
+| `brushspeed.setall` | Set brush speed for all players at once |
 | `brushspeed.reload` | Reload the config |
 
 ## Configuration
@@ -72,4 +86,4 @@ The plugin intercepts Paper's `PlayerBrushEvent` (fired on each brush stroke aga
 mvn package
 ```
 
-The plugin jar will be in `target/BrushSpeed-1.0.0.jar`.
+The plugin jar will be in `target/BrushSpeed-1.1.0.jar`.
