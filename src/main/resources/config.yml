@@ -1,0 +1,42 @@
+# =============================================
+#          BrushSpeed Configuration
+# =============================================
+# default-speed: the speed for players with no special permission or manual override
+#   1.0 = normal vanilla speed
+#   2.0 = twice as fast (half the brush strokes needed)
+#   0.5 = half speed (twice the brush strokes needed)
+#   Range: 0.1 to 10.0
+
+default-speed: 1.0
+
+# Hard limits for the /brushspeed set command
+min-speed: 0.1
+max-speed: 10.0
+
+# How many vanilla brush strokes excavate a block (vanilla = 10)
+# Changing this affects ALL speeds proportionally
+base-strokes: 10
+
+# Permission-based speed tiers
+# Players with brushspeed.speed.<tier> get the speed listed here
+# If a player has multiple tiers, the highest speed wins
+# Manually set speeds (/brushspeed set) always override these
+permission-speeds:
+  vip: 2.0
+  elite: 5.0
+  slow: 0.5
+
+# Whether to show an action bar progress indicator while brushing
+show-progress-bar: true
+
+# Messages — supports & color codes
+messages:
+  speed-set: "&aBrush speed set to &f{speed}x&a."
+  speed-get: "&6Current brush speed: &f{speed}x"
+  speed-reset: "&aBrush speed reset to default &f({speed}x)&a."
+  speed-set-other: "&aSet &f{player}&a's brush speed to &f{speed}x&a."
+  no-permission: "&cYou don't have permission to do that."
+  invalid-speed: "&cSpeed must be a number between &f{min}&c and &f{max}&c."
+  reloaded: "&aBrushSpeed config reloaded!"
+  player-not-found: "&cPlayer not found."
+  excavated: "&7[BrushSpeed] &fBrushed at &e{speed}x&f speed."

@@ -1,0 +1,37 @@
+name: BrushSpeed
+version: ${project.version}
+main: com.brushspeed.BrushSpeedPlugin
+api-version: '1.20'
+description: Change the speed of brushing suspicious sand and gravel blocks
+author: BrushSpeed
+website: https://github.com/tiagoferreira/BrushSpeed
+
+commands:
+  brushspeed:
+    description: Manage brush speed settings
+    usage: /brushspeed [set <speed> [player]|reset|reload]
+    aliases: [bs, bspeed]
+    permission: brushspeed.use
+
+permissions:
+  brushspeed.use:
+    description: Allows using the /brushspeed command to view own speed
+    default: true
+  brushspeed.set:
+    description: Allows setting your own brush speed
+    default: op
+  brushspeed.set.others:
+    description: Allows setting other players' brush speed
+    default: op
+  brushspeed.reload:
+    description: Allows reloading the plugin config
+    default: op
+  brushspeed.speed.vip:
+    description: Applies the VIP speed tier from config
+    default: false
+  brushspeed.speed.elite:
+    description: Applies the Elite speed tier from config
+    default: false
+  brushspeed.speed.slow:
+    description: Applies the slow speed tier from config
+    default: false
