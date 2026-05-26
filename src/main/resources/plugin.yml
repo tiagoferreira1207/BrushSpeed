@@ -1,7 +1,7 @@
 name: BrushSpeed
 version: ${project.version}
 main: com.brushspeed.BrushSpeedPlugin
-api-version: '1.20'
+api-version: '1.21'
 description: Change the speed of brushing suspicious sand and gravel blocks
 author: BrushSpeed
 website: https://github.com/tiagoferreira/BrushSpeed
