@@ -22,6 +22,9 @@ show-progress-bar: true
 
 # Messages — supports & color codes
 messages:
+  enchant-success: "&aApplied &f{speed}x &abrush speed to your brush!"
+  disenchant-success: "&aRemoved the custom brush speed from your brush."
+  not-a-brush: "&cYou must be holding a brush to use this command."
   speed-set-all: "&6[BrushSpeed] &aThe brush speed has been changed to &f{speed}x &afor everyone!"
   speed-reset-all: "&6[BrushSpeed] &aThe brush speed has been reset to default &f({speed}x) &afor everyone!"
   speed-set: "&aBrush speed set to &f{speed}x&a."

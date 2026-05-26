@@ -2,11 +2,13 @@ package com.brushspeed;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Arrays;
@@ -51,16 +53,80 @@ public class BrushSpeedPlugin extends JavaPlugin implements CommandExecutor, Tab
         }
 
         return switch (args[0].toLowerCase()) {
+            case "enchant" -> handleEnchant(sender, args);
+            case "disenchant" -> handleDisenchant(sender);
             case "set" -> handleSet(sender, args);
             case "setall" -> handleSetAll(sender, args);
             case "reset" -> handleReset(sender);
             case "resetall" -> handleResetAll(sender);
             case "reload" -> handleReload(sender);
             default -> {
-                sender.sendMessage(legacyColor("&6Usage: /brushspeed [set <speed> [player] | setall <speed> | reset | resetall | reload]"));
+                sender.sendMessage(legacyColor("&6Usage: /brushspeed [enchant <speed> | disenchant | set <speed> [player] | setall <speed> | reset | resetall | reload]"));
                 yield true;
             }
         };
+    }
+
+    private boolean handleEnchant(CommandSender sender, String[] args) {
+        if (!sender.hasPermission("brushspeed.enchant")) {
+            sender.sendMessage(legacyColor(getMessage("no-permission")));
+            return true;
+        }
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can enchant a brush.");
+            return true;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(legacyColor("&cUsage: /brushspeed enchant <speed>"));
+            return true;
+        }
+
+        ItemStack held = player.getInventory().getItemInMainHand();
+        if (held.getType() != Material.BRUSH) {
+            sender.sendMessage(legacyColor(getMessage("not-a-brush")));
+            return true;
+        }
+
+        double min = getConfig().getDouble("min-speed", 0.1);
+        double max = getConfig().getDouble("max-speed", 10.0);
+
+        try {
+            double speed = Double.parseDouble(args[1]);
+            if (speed < min || speed > max) {
+                sender.sendMessage(legacyColor(getMessage("invalid-speed")
+                        .replace("{min}", formatSpeed(min))
+                        .replace("{max}", formatSpeed(max))));
+                return true;
+            }
+            brushManager.applySpeedToItem(held, speed);
+            player.sendMessage(legacyColor(getMessage("enchant-success").replace("{speed}", formatSpeed(speed))));
+        } catch (NumberFormatException e) {
+            sender.sendMessage(legacyColor(getMessage("invalid-speed")
+                    .replace("{min}", formatSpeed(min))
+                    .replace("{max}", formatSpeed(max))));
+        }
+        return true;
+    }
+
+    private boolean handleDisenchant(CommandSender sender) {
+        if (!sender.hasPermission("brushspeed.enchant")) {
+            sender.sendMessage(legacyColor(getMessage("no-permission")));
+            return true;
+        }
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can disenchant a brush.");
+            return true;
+        }
+
+        ItemStack held = player.getInventory().getItemInMainHand();
+        if (held.getType() != Material.BRUSH) {
+            sender.sendMessage(legacyColor(getMessage("not-a-brush")));
+            return true;
+        }
+
+        brushManager.removeSpeedFromItem(held);
+        player.sendMessage(legacyColor(getMessage("disenchant-success")));
+        return true;
     }
 
     private boolean handleSet(CommandSender sender, String[] args) {
@@ -197,9 +263,9 @@ public class BrushSpeedPlugin extends JavaPlugin implements CommandExecutor, Tab
     @Override
     public List<String> onTabComplete(CommandSender sender, Command cmd, String alias, String[] args) {
         if (args.length == 1) {
-            return Arrays.asList("set", "setall", "reset", "resetall", "reload");
+            return Arrays.asList("enchant", "disenchant", "set", "setall", "reset", "resetall", "reload");
         }
-        if (args.length == 2 && (args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setall"))) {
+        if (args.length == 2 && (args[0].equalsIgnoreCase("enchant") || args[0].equalsIgnoreCase("set") || args[0].equalsIgnoreCase("setall"))) {
             return Arrays.asList("0.5", "1.0", "2.0", "5.0", "10.0");
         }
         if (args.length == 3 && args[0].equalsIgnoreCase("set")) {

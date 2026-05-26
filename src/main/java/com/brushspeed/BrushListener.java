@@ -28,7 +28,7 @@ public class BrushListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlock();
 
-        double speed = brushManager.getEffectiveSpeed(player);
+        double speed = brushManager.getEffectiveSpeed(player, event.getItem());
 
         // Vanilla speed — let the game handle it, nothing to override
         if (speed == 1.0) return;

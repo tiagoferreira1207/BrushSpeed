@@ -1,9 +1,10 @@
 # BrushSpeed
 
-A Paper Minecraft plugin that lets OPs control how fast players brush suspicious sand and gravel blocks.
+A Paper Minecraft plugin that lets OPs control how fast players brush suspicious sand and gravel blocks — globally, per player, or on a **specific brush item**.
 
 ## Features
 
+- **Enchant a specific brush** with a custom speed — the speed travels with the item
 - Set brush speed for **all players at once** with a single command
 - Set brush speed per player individually
 - Speed range: 0.1x (very slow) up to 10x (instant)
@@ -12,7 +13,7 @@ A Paper Minecraft plugin that lets OPs control how fast players brush suspicious
 
 ## Requirements
 
-- Paper 1.20.4 or newer (uses `PlayerBrushEvent` from Paper API)
+- Paper 1.21 or newer (uses `PlayerBrushEvent` from Paper API)
 - Java 21+
 
 ## Installation
@@ -27,6 +28,8 @@ A Paper Minecraft plugin that lets OPs control how fast players brush suspicious
 | Command | Description | Who can use |
 |---|---|---|
 | `/brushspeed` | Show your current brush speed | OP only |
+| `/brushspeed enchant <speed>` | Apply a speed to the brush you're holding | OP only |
+| `/brushspeed disenchant` | Remove the custom speed from your held brush | OP only |
 | `/brushspeed setall <speed>` | Set brush speed for **all players** at once | OP only |
 | `/brushspeed resetall` | Reset everyone back to default speed | OP only |
 | `/brushspeed set <speed>` | Set your own brush speed (0.1–10.0) | OP only |
@@ -40,11 +43,23 @@ Alias: `/bs`, `/bspeed`
 
 When a player brushes, the speed is resolved in this order:
 
-1. **Individual speed** — set via `/brushspeed set <speed> <player>`
-2. **Global speed** — set via `/brushspeed setall <speed>`
-3. **Config default** — `default-speed` in `config.yml`
+1. **Item speed** — set via `/brushspeed enchant` on that specific brush
+2. **Individual speed** — set via `/brushspeed set <speed> <player>`
+3. **Global speed** — set via `/brushspeed setall <speed>`
+4. **Config default** — `default-speed` in `config.yml`
 
-> Using `/brushspeed setall` clears all individual overrides so everyone gets the same speed.
+> The item speed always wins. A brush enchanted with 5x will always brush at 5x, regardless of any global or player settings.
+
+## How to enchant a brush
+
+1. Hold a brush in your main hand
+2. Run `/brushspeed enchant 3` (or any speed from 0.1 to 10.0)
+3. The brush now shows `⚡ Brush Speed: 3x` in its lore
+4. Only that brush brushes at that speed — other brushes are unaffected
+
+To remove the speed: hold the brush and run `/brushspeed disenchant`.
+
+The speed is stored in the item's data (PersistentDataContainer), so it survives server restarts, trades, chest storage, and anvil renames.
 
 ## Permissions
 
@@ -53,6 +68,7 @@ All permissions default to **OP only**.
 | Permission | Description |
 |---|---|
 | `brushspeed.use` | View own brush speed |
+| `brushspeed.enchant` | Apply/remove speed on a specific brush item |
 | `brushspeed.set` | Set own brush speed |
 | `brushspeed.set.others` | Set another player's brush speed |
 | `brushspeed.setall` | Set brush speed for all players at once |
@@ -86,4 +102,4 @@ The plugin intercepts Paper's `PlayerBrushEvent` (fired on each brush stroke aga
 mvn package
 ```
 
-The plugin jar will be in `target/BrushSpeed-1.1.0.jar`.
+The plugin jar will be in `target/BrushSpeed-1.2.0.jar`.
