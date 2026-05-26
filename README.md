@@ -13,7 +13,7 @@ A Paper Minecraft plugin that lets OPs control how fast players brush suspicious
 
 ## Requirements
 
-- Paper 1.21 or newer (uses `PlayerBrushEvent` from Paper API)
+- Paper 1.21 or newer
 - Java 21+
 
 ## Installation
@@ -59,7 +59,7 @@ When a player brushes, the speed is resolved in this order:
 
 To remove the speed: hold the brush and run `/brushspeed disenchant`.
 
-The speed is stored in the item's data (PersistentDataContainer), so it survives server restarts, trades, chest storage, and anvil renames.
+The speed is stored in the item's persistent data (PersistentDataContainer), so it survives server restarts, trades, chest storage, and anvil renames.
 
 ## Permissions
 
@@ -83,18 +83,18 @@ default-speed: 1.0
 min-speed: 0.1
 max-speed: 10.0
 
-# Vanilla takes 10 strokes to excavate a block
-base-strokes: 10
+# Ticks for vanilla brushing speed (~96 ticks = ~4.8 seconds)
+base-ticks: 96
 
 show-progress-bar: true
 ```
 
 ## How it works
 
-The plugin intercepts Paper's `PlayerBrushEvent` (fired on each brush stroke against suspicious sand/gravel). For any speed other than 1.0, it cancels the vanilla stroke and counts strokes itself — applying the speed multiplier to determine how many strokes are actually needed. Once the threshold is reached, it manually excavates the block: fetches the loot from the block entity, drops it, replaces the block with normal sand/gravel, and plays the dig sound and particles.
+The plugin intercepts `PlayerInteractEvent` (right-click on suspicious sand/gravel with a brush) and cancels the vanilla behaviour. It then starts a per-player tick-based task that counts elapsed ticks against a speed-adjusted target (`base-ticks / speed`). Each tick it checks the player is still aiming at the block with a brush in hand, updates the block's visual uncovering state, and plays the brush sound. Once the target tick count is reached, it manually excavates the block: fetches the loot from the block entity, drops it, replaces the block with normal sand/gravel, and plays the break sound and particles.
 
-**Speed > 1.0:** fewer strokes needed → excavates faster  
-**Speed < 1.0:** more strokes needed → excavates slower
+**Speed > 1.0:** fewer ticks needed → excavates faster  
+**Speed < 1.0:** more ticks needed → excavates slower
 
 ## Building from source
 
@@ -102,4 +102,4 @@ The plugin intercepts Paper's `PlayerBrushEvent` (fired on each brush stroke aga
 mvn package
 ```
 
-The plugin jar will be in `target/BrushSpeed-1.2.0.jar`.
+The plugin jar will be in `target/BrushSpeed-1.3.0.jar`.

@@ -15,6 +15,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -27,21 +28,24 @@ public class BrushManager {
     private final BrushSpeedPlugin plugin;
     private final NamespacedKey speedKey;
 
-    // Player UUID -> individually set speed (overrides global)
+    // Player UUID -> individually set speed
     private final Map<UUID, Double> playerSpeeds = new HashMap<>();
 
     // Global speed applied to every player (null = not set)
     private Double globalSpeed = null;
 
-    // Player UUID -> (block location key -> stroke count)
-    private final Map<UUID, Map<String, Integer>> brushSessions = new HashMap<>();
+    // Player UUID -> active brushing task
+    private final Map<UUID, BukkitTask> activeTasks = new HashMap<>();
 
     public BrushManager(BrushSpeedPlugin plugin) {
         this.plugin = plugin;
         this.speedKey = new NamespacedKey(plugin, "speed");
     }
 
-    // Priority: item speed → per-player speed → global speed → config default
+    // -------------------------------------------------------------------------
+    // Speed resolution — priority: item → per-player → global → config default
+    // -------------------------------------------------------------------------
+
     public double getEffectiveSpeed(Player player, ItemStack brush) {
         double itemSpeed = getItemSpeed(brush);
         if (itemSpeed > 0) return itemSpeed;
@@ -53,13 +57,13 @@ public class BrushManager {
         return plugin.getConfig().getDouble("default-speed", 1.0);
     }
 
-    // Overload used by commands where no specific brush is in context
+    // Overload for commands where we check the held item automatically
     public double getEffectiveSpeed(Player player) {
         return getEffectiveSpeed(player, player.getInventory().getItemInMainHand());
     }
 
     // -------------------------------------------------------------------------
-    // Item-based speed (PDC)
+    // Item-based speed (PDC + lore)
     // -------------------------------------------------------------------------
 
     public double getItemSpeed(ItemStack item) {
@@ -77,7 +81,6 @@ public class BrushManager {
 
         meta.getPersistentDataContainer().set(speedKey, PersistentDataType.DOUBLE, speed);
 
-        // Rebuild lore: remove any existing speed line, then insert ours at the top
         List<Component> lore = meta.lore() != null ? new ArrayList<>(meta.lore()) : new ArrayList<>();
         lore.removeIf(this::isSpeedLoreLine);
         lore.add(0, buildSpeedLore(speed));
@@ -108,8 +111,6 @@ public class BrushManager {
     }
 
     private boolean isSpeedLoreLine(Component line) {
-        // Detect our lore line by checking for the PDC key on a fresh read is not
-        // possible on a Component, so we match on the gold "⚡ Brush Speed:" prefix.
         return net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer
                 .plainText().serialize(line).startsWith("⚡ Brush Speed:");
     }
@@ -141,31 +142,38 @@ public class BrushManager {
     }
 
     // -------------------------------------------------------------------------
-    // Brush sessions
+    // Task-based brush sessions
     // -------------------------------------------------------------------------
 
-    public int incrementStroke(Player player, Block block) {
-        String key = blockKey(block);
-        return brushSessions
-                .computeIfAbsent(player.getUniqueId(), k -> new HashMap<>())
-                .merge(key, 1, Integer::sum);
+    public void startSession(Player player, Block block, ItemStack brush) {
+        cancelSession(player); // cancel any existing session first
+
+        double speed = getEffectiveSpeed(player, brush);
+        int baseTicks = plugin.getConfig().getInt("base-ticks", 96);
+        int required = Math.max(1, (int) Math.ceil(baseTicks / speed));
+
+        BrushTask task = new BrushTask(plugin, this, player, block, brush, speed, required);
+        BukkitTask bukkitTask = task.runTaskTimer(plugin, 1L, 1L);
+        activeTasks.put(player.getUniqueId(), bukkitTask);
     }
 
-    public void clearSession(Player player, Block block) {
-        Map<String, Integer> sessions = brushSessions.get(player.getUniqueId());
-        if (sessions != null) sessions.remove(blockKey(block));
+    public void cancelSession(Player player) {
+        BukkitTask task = activeTasks.remove(player.getUniqueId());
+        if (task != null) task.cancel();
     }
 
-    public void clearAllSessions(Player player) {
-        brushSessions.remove(player.getUniqueId());
+    public void clearTask(Player player) {
+        activeTasks.remove(player.getUniqueId());
     }
 
     public void cancelAll() {
-        brushSessions.clear();
+        activeTasks.values().forEach(BukkitTask::cancel);
+        activeTasks.clear();
     }
 
     public void reload() {
-        brushSessions.clear();
+        cancelAll();
+        playerSpeeds.clear();
     }
 
     // -------------------------------------------------------------------------
@@ -195,19 +203,10 @@ public class BrushManager {
 
         block.getWorld().spawnParticle(Particle.BLOCK, center, 20, 0.3, 0.3, 0.3, 0.05, originalData);
         block.getWorld().playSound(center, Sound.BLOCK_SAND_BREAK, 1.0f, 1.0f);
-
-        clearSession(player, block);
     }
 
     public boolean isSuspicious(Block block) {
         return block.getType() == Material.SUSPICIOUS_SAND
                 || block.getType() == Material.SUSPICIOUS_GRAVEL;
-    }
-
-    private String blockKey(Block block) {
-        return block.getWorld().getName()
-                + ":" + block.getX()
-                + ":" + block.getY()
-                + ":" + block.getZ();
     }
 }

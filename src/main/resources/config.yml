@@ -13,9 +13,9 @@ default-speed: 1.0
 min-speed: 0.1
 max-speed: 10.0
 
-# How many vanilla brush strokes excavate a block (vanilla = 10)
+# How many ticks vanilla brushing takes to excavate a block (~96 = ~4.8 seconds)
 # Changing this affects ALL speeds proportionally
-base-strokes: 10
+base-ticks: 96
 
 # Whether to show an action bar progress indicator while brushing
 show-progress-bar: true
